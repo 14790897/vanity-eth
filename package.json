@@ -7,6 +7,7 @@
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
+        "dev": "vue-cli-service serve",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint",
         "build:deploy": "npm i --no-save prerender-spa-plugin && cross-env DEPLOY=true npm run build",
@@ -15,6 +16,7 @@
     },
     "prettier": "@bokub/prettier-config",
     "dependencies": {
+        "axios": "^1.7.2",
         "blockies": "^0.0.2",
         "bootstrap": "^4.6.0",
         "core-js": "^3.6.5",

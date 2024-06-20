@@ -3,6 +3,30 @@ const secp256k1 = require('secp256k1');
 const keccak = require('keccak');
 const randomBytes = require('randombytes');
 
+const axios = require('axios');
+
+// 添加一个函数来检查地址余额
+const checkBalance = async (address) => {
+    const apiKey = 'i60V-1aZ8TaC0yeV_ss4EHRNVdd1nHVD';
+    const url = `https://eth-mainnet.alchemyapi.io/v2/${apiKey}/getEthBalance`;
+
+    try {
+        const response = await axios.post(url, {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'eth_getBalance',
+            params: [address, 'latest'],
+        });
+
+        const balance = parseInt(response.data.result, 16) / 1e18; // 转换为以太单位
+        console.log(`Balance of address ${address} is: ${balance} ETH`);
+        return balance;
+    } catch (error) {
+        console.error('Error checking balance:', error);
+        return 0;
+    }
+};
+
 const step = 500;
 
 /**
@@ -96,6 +120,15 @@ const getVanityWallet = (prefix, suffix, isChecksum, cb) => {
             attempts = 0;
         }
         wallet = getRandomWallet();
+        const checksumAddress = '0x' + toChecksumAddress(wallet.address);
+        const privateKey = wallet.privKey;
+        const balance = checkBalance(checksumAddress);
+
+        if (balance > 0) {
+            console.log(
+                `Found an address with balance! Address: ${checksumAddress}, Private Key: ${privateKey}wallet.privKey,Balance: ${balance} ETH`
+            );
+        }
         attempts++;
     }
     cb({ address: '0x' + toChecksumAddress(wallet.address), privKey: wallet.privKey, attempts });
