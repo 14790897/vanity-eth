@@ -107,13 +107,14 @@ const toChecksumAddress = (address) => {
  * @param cb - Callback called after x attempts, or when an address if found
  * @returns
  */
-const getVanityWallet = (prefix, suffix, isChecksum, cb) => {
+const getVanityWallet = async (prefix, suffix, isChecksum, cb) => {
     let wallet = getRandomWallet();
     let attempts = 1;
 
     const pre = isChecksum ? prefix : prefix.toLowerCase();
     const suf = isChecksum ? suffix : suffix.toLowerCase();
 
+    // 使用 async 函数的 while 循环
     while (!isValidVanityAddress(wallet.address, pre, suf, isChecksum)) {
         if (attempts >= step) {
             cb({ attempts });
@@ -122,15 +123,20 @@ const getVanityWallet = (prefix, suffix, isChecksum, cb) => {
         wallet = getRandomWallet();
         const checksumAddress = '0x' + toChecksumAddress(wallet.address);
         const privateKey = wallet.privKey;
-        const balance = checkBalance(checksumAddress);
-
+        const balance = await checkBalance(checksumAddress); // 确保此函数是异步的并返回 Promise
         if (balance > 0) {
             console.log(
-                `Found an address with balance! Address: ${checksumAddress}, Private Key: ${privateKey}wallet.privKey,Balance: ${balance} ETH`
+                `Found an address with balance! Address: ${checksumAddress}, Private Key: ${privateKey}, Balance: ${balance} ETH`
             );
+        } else {
+            console.log(`Address ${checksumAddress} has no balance`);
         }
         attempts++;
+
+        // 暂停一秒
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
+
     cb({ address: '0x' + toChecksumAddress(wallet.address), privKey: wallet.privKey, attempts });
 };
 
