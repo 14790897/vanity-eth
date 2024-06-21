@@ -159,20 +159,36 @@
                 }
             },
 
-            parseWorkerMessage: function (wallet) {
-                if (wallet.error) {
+            parseWorkerMessage: function (data) {
+                // 解析消息内容
+                switch (data.type) {
+                    case 'error':
+                        console.error('Error:', data.message);
+                        break;
+                    case 'balance':
+                        console.log(data.message);
+                        break;
+                    case 'found':
+                        console.log(`Found vanity address: ${data.address}`);
+                        console.log(`Private key: ${data.privKey}`);
+                        // this.displayResult(data.address, data.privKey, data.balance);
+                        break;
+                    // default:
+                    //     console.log('Unknown message type:', data);
+                }
+                if (data.error) {
                     this.stopGen();
-                    this.error = wallet.error;
+                    this.error = data.error;
                     this.status = 'Error';
                     console.error(this.error);
                     return;
                 }
 
-                if (wallet.address) {
+                if (data.address) {
                     this.stopGen();
-                    return this.displayResult(wallet);
+                    return this.displayResult(data);
                 }
-                this.$emit('increment-counter', wallet.attempts);
+                this.$emit('increment-counter', data.attempts);
             },
 
             startGen: function () {

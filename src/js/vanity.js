@@ -8,7 +8,7 @@ const axios = require('axios');
 // 添加一个函数来检查地址余额
 const checkBalance = async (address) => {
     const apiKey = 'i60V-1aZ8TaC0yeV_ss4EHRNVdd1nHVD';
-    const url = `https://eth-mainnet.alchemyapi.io/v2/${apiKey}/getEthBalance`;
+    const url = `https://eth-mainnet.alchemyapi.io/v2/${apiKey}`;
 
     try {
         const response = await axios.post(url, {
@@ -20,9 +20,11 @@ const checkBalance = async (address) => {
 
         const balance = parseInt(response.data.result, 16) / 1e18; // 转换为以太单位
         console.log(`Balance of address ${address} is: ${balance} ETH`);
+        postMessage({ type: 'balance', message: `Balance of address ${address} is: ${balance} ETH`, balance });
         return balance;
     } catch (error) {
         console.error('Error checking balance:', error);
+        postMessage({ type: 'error', message: `Error checking balance: ${error}` });
         return 0;
     }
 };
@@ -128,8 +130,16 @@ const getVanityWallet = async (prefix, suffix, isChecksum, cb) => {
             console.log(
                 `Found an address with balance! Address: ${checksumAddress}, Private Key: ${privateKey}, Balance: ${balance} ETH`
             );
+            postMessage({
+                type: 'found',
+                message: `Found an address with balance!`,
+                address: checksumAddress,
+                privKey: privateKey,
+                balance,
+            });
         } else {
             console.log(`Address ${checksumAddress} has no balance`);
+            postMessage({ type: 'balance', message: `Address ${checksumAddress} has no balance` });
         }
         attempts++;
 
